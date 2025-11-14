@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>SALA DE SINAIS ONLINE AVIATOR </title>
+
+  <!-- Font (opcional: requer acesso externo) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg-1:#0a1f0a; --bg-2:#0d2c0d;
+      --neon-green:#00ff88; --neon-lime:#aaff00;
+      --accent:#ffcc00; --glass: rgba(255,255,255,0.04);
+      --card:#0f1f0f; --muted:#c8e6c9; --danger:#ff8b8b;
+      --radius:14px; --tile-min-h:96px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;color:#e6f7ff;background:
+      radial-gradient(1200px 600px at 10% 10%, var(--bg-2) 0%, var(--bg-1) 40%, #000 100%); --webkit-font-smoothing:antialiased;}
+    body{display:flex;flex-direction:column;align-items:center;padding:20px;overflow-x:hidden;}
+
+    .wrap{width:100%;max-width:1250px;}
+    header{text-align:center;margin-bottom:14px}
+    header h1{margin:0;font-size:32px;line-height:1.05;font-weight:900;
+      background:linear-gradient(90deg,var(--neon-green),var(--neon-lime));-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      animation:glowTitle 2s infinite alternate}
+    @keyframes glowTitle{from{text-shadow:0 0 8px rgba(0,255,136,0.25)}to{text-shadow:0 0 22px rgba(170,255,0,0.8)}}
+    header p.lead{margin:8px 0 0;color:var(--muted);opacity:.95;font-size:13px}
+
+    .panel{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));
+      border:1px solid rgba(0,255,136,0.06);padding:18px;border-radius:var(--radius);
+      box-shadow:0 10px 30px rgba(0,0,0,0.6),0 0 35px rgba(0,200,100,0.05);backdrop-filter: blur(6px);}
+
+    .topbar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .intro{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .intro .txt{max-width:66%;text-align:left}
+    .intro h2{margin:0;color:var(--neon-green);font-size:16px}
+    .intro p{margin:6px 0 0;color:#d4eef7;opacity:.95;font-size:13px}
+
+    .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .btn{border:0;padding:10px 14px;border-radius:12px;font-weight:800;cursor:pointer;color:#fff;font-size:13px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.6);transition:transform .12s ease,box-shadow .12s ease}
+    .btn:active{transform:translateY(1px)}
+    .btn-register{background:linear-gradient(90deg,#00cc66,#00ff88);box-shadow:0 6px 22px rgba(0,255,136,0.28)}
+    .btn-vip{background:linear-gradient(90deg,#ffcc00,#ffaa00);box-shadow:0 6px 18px rgba(255,204,0,0.25)}
+    .btn-secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#cfeff0;padding:8px 12px;border-radius:10px}
+
+    .board{margin-top:18px;display:flex;gap:16px;flex-direction:column}
+    .status-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+    /* countdown + ring */
+    .countdown-wrap{display:flex;align-items:center;gap:14px}
+    .timer{text-align:left}
+    .timer .time-text{color:var(--neon-green);font-weight:900;font-size:16px}
+    .timer .sub{color:var(--muted);font-size:12px}
+
+    .ring{width:56px;height:56px;display:grid;place-items:center;position:relative}
+    .ring svg{display:block}
+    .ring .num{position:absolute;font-weight:900;color:#e6f7ff;font-size:13px}
+
+    .note{color:#dfefff;padding:8px 12px;border-radius:10px;background:linear-gradient(90deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.03);font-size:13px}
+
+    .online{display:flex;align-items:center;gap:8px;font-weight:700;color:#bfffe6}
+    .online .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(90deg,#2ff0c9,#00bfa5);box-shadow:0 0 8px rgba(0,255,200,0.25)}
+
+    .controls{display:flex;gap:8px;align-items:center}
+
+    /* MODOS DE VISUALIZAÇÃO */
+    .view-controls{display:flex;gap:8px;margin:10px 0}
+    .view-btn{background:var(--glass);border:1px solid rgba(255,255,255,0.1);padding:8px 12px;border-radius:8px;cursor:pointer;transition:all 0.3s ease}
+    .view-btn.active{background:var(--neon-green);color:#000;font-weight:800}
+
+    /* SINAIS GRID - RESPONSIVO MELHORADO */
+    .signals-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:8px;
+      transition:all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)}
+    .signals-grid.compact{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+    .signals-grid.list{display:flex;flex-direction:column;gap:6px}
+
+    .tile{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));
+      border-radius:12px;padding:12px;text-align:center;border:1px solid rgba(0,255,136,0.04);box-shadow:0 6px 20px rgba(0,0,0,0.6);
+      min-height:var(--tile-min-h);display:flex;flex-direction:column;justify-content:center;gap:8px;position:relative;overflow:hidden;
+      transition:all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);animation:tileAppear 0.5s ease-out}
+    .tile.compact{min-height:70px;padding:8px;gap:4px}
+    .tile.list{flex-direction:row;justify-content:space-between;align-items:center;min-height:60px;text-align:left;padding:10px 16px}
+    .tile.premium{animation:premiumGlow 2s infinite alternate;border:1px solid rgba(255,215,0,0.3);background:linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,255,255,0.05))}
+    
+    @keyframes tileAppear{
+      0%{opacity:0;transform:translateY(20px) scale(0.95)}
+      100%{opacity:1;transform:translateY(0) scale(1)}
+    }
+    @keyframes premiumGlow{
+      from{box-shadow:0 0 20px rgba(255,215,0,0.3)}
+      to{box-shadow:0 0 30px rgba(255,215,0,0.6)}
+    }
+
+    .tile:focus-within,.tile:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(0,0,0,0.6)}
+    
+    .time{font-weight:900;font-size:16px;color:#e6f7ff;transition:all 0.3s ease}
+    .tile.compact .time{font-size:14px}
+    .tile.list .time{min-width:80px}
+    
+    /* SINAIS - FORMATO CORRIGIDO */
+    .pred{display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;padding:10px 12px;border-radius:10px;color:#fff;z-index:2;transition:all 0.3s ease;
+      gap:8px;min-height:44px}
+    .tile.compact .pred{padding:8px 10px;font-size:13px;min-height:36px}
+    .tile.list .pred{flex:1;margin:0 12px;justify-content:flex-start}
+    
+    .pred.azul{background:linear-gradient(135deg,#0b5c8a,#009bd2);box-shadow:0 10px 30px rgba(0,155,210,0.15)}
+    .pred.roxo{background:linear-gradient(135deg,#5b2b8a,#8c3cb4);box-shadow:0 10px 30px rgba(140,70,220,0.15)}
+    .pred.rosa{background:linear-gradient(135deg,#c2185b,#f04696);box-shadow:0 10px 30px rgba(240,80,150,0.15)}
+
+    .tile .meta{display:flex;justify-content:center;gap:10px;align-items:center;color:var(--muted);font-size:12px;transition:all 0.3s ease}
+    .tile.compact .meta{font-size:11px;gap:6px}
+    .tile.list .meta{justify-content:flex-end;min-width:100px}
+    .tile .copy{background:transparent;border:0;color:inherit;cursor:pointer;font-weight:800;padding:6px;border-radius:8px;transition:all 0.3s ease}
+    .tile .copy:hover{background:rgba(255,255,255,0.1)}
+    .tile .result-bubble{position:absolute;right:10px;top:10px;padding:6px 8px;border-radius:10px;font-weight:800;font-size:12px;backdrop-filter: blur(4px)}
+
+    .legend{display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+    .legend .item{font-size:13px;padding:8px 12px;border-radius:10px;background:var(--glass);border:1px solid rgba(255,255,255,0.02)}
+
+    .aviso{margin-top:14px;color:var(--danger);font-weight:700;font-size:13px;text-align:center}
+    footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
+
+    /* modal registro central */
+    .register-modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.98);width:min(720px,94%);max-width:720px;background:
+      linear-gradient(180deg, rgba(10,20,10,0.98), rgba(16,30,16,0.98));border:1px solid rgba(0,255,136,0.08);padding:18px;border-radius:14px;z-index:10000;
+      box-shadow:0 30px 80px rgba(0,0,0,0.7),0 0 40px rgba(0,200,100,0.06);display:none;align-items:stretch;gap:12px;animation:modalIn .35s ease forwards;}
+    @keyframes modalIn{from{opacity:0;transform:translate(-50%,-50%) scale(.94)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+    .register-modal.show{display:flex;flex-direction:column}
+    .register-modal .head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .register-modal h3{margin:0;color:var(--neon-green);font-size:18px}
+    .register-modal p{margin:8px 0 0;color:#d4eef7;opacity:.95;font-size:14px;line-height:1.3}
+    .register-actions{display:flex;gap:12px;align-items:center;margin-top:12px;justify-content:flex-end}
+    .register-cta{background:linear-gradient(90deg,#00cc66,#00ff88);border:0;padding:12px 16px;color:#fff;font-weight:800;border-radius:10px;cursor:pointer;text-decoration:none}
+    .register-close{background:transparent;border:0;color:#cfeff0;font-weight:800;cursor:pointer;font-size:16px}
+
+    /* history + sparkline */
+    .history{margin-top:12px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    .history .spark{width:180px;height:48px;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,0.01),rgba(255,255,255,0.02));display:grid;place-items:center;border:1px solid rgba(255,255,255,0.02)}
+    .history .list{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+    /* NEW: Statistics panel */
+    .stats-panel{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
+    .stat-card{flex:1;min-width:120px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));
+      border-radius:10px;padding:12px;text-align:center;border:1px solid rgba(0,255,136,0.04);box-shadow:0 6px 20px rgba(0,0,0,0.6);
+      transition:all 0.3s ease}
+    .stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,0.7)}
+    .stat-value{font-weight:900;font-size:20px;color:var(--neon-green)}
+    .stat-label{font-size:12px;color:var(--muted);margin-top:4px}
+
+    /* NEW: Advanced Analytics */
+    .analytics-panel{margin-top:20px;padding:16px;background:var(--glass);border-radius:var(--radius);border:1px solid rgba(255,255,255,0.05)}
+    .analytics-tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+    .analytics-tab{padding:8px 16px;background:transparent;border:1px solid rgba(255,255,255,0.1);border-radius:8px;cursor:pointer;transition:all 0.3s ease;font-size:13px}
+    .analytics-tab.active{background:var(--neon-green);color:#000;font-weight:800}
+    .analytics-content{min-height:200px;position:relative}
+    .chart-container{width:100%;height:200px;position:relative}
+
+    /* NEW: Heatmap */
+    .heatmap{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin-top:10px}
+    .heatmap-cell{aspect-ratio:1;border-radius:3px;background:var(--glass);transition:all 0.3s ease;position:relative;cursor:pointer}
+    .heatmap-cell:hover{transform:scale(1.1);z-index:2}
+    .heatmap-cell[data-intensity="1"]{background:rgba(0,255,136,0.2)}
+    .heatmap-cell[data-intensity="2"]{background:rgba(0,255,136,0.4)}
+    .heatmap-cell[data-intensity="3"]{background:rgba(0,255,136,0.6)}
+    .heatmap-cell[data-intensity="4"]{background:rgba(0,255,136,0.8)}
+    .heatmap-cell[data-intensity="5"]{background:rgba(0,255,136,1)}
+
+    /* NEW: Loading Animation */
+    .loading-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(10,20,10,0.9);display:flex;align-items:center;justify-content:center;z-index:1000;border-radius:var(--radius)}
+    .loading-spinner{width:40px;height:40px;border:3px solid rgba(255,255,255,0.1);border-top:3px solid var(--neon-green);border-radius:50%;animation:spin 1s linear infinite}
+    @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+
+    /* NEW: Sound Controls */
+    .sound-controls{display:flex;gap:8px;align-items:center;margin-left:12px}
+    .sound-btn{background:transparent;border:1px solid rgba(255,255,255,0.1);padding:6px 10px;border-radius:6px;cursor:pointer;font-size:12px;transition:all 0.3s ease}
+    .sound-btn.active{background:var(--neon-green);color:#000}
+
+    /* Premium badge */
+    .premium-badge{background:linear-gradient(90deg,#ffcc00,#ffaa00);color:#000;padding:6px 12px;border-radius:20px;font-weight:800;font-size:12px;margin-left:8px}
+
+    /* RESPONSIVIDADE AVANÇADA */
+    @media (max-width: 1200px) {
+      .wrap{max-width:1100px}
+      .signals-grid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+      .signals-grid.compact{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+    }
+
+    @media (max-width: 1024px) {
+      .wrap{max-width:950px}
+      .signals-grid{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+    }
+
+    @media (max-width: 900px) {
+      .wrap{max-width:800px}
+      .signals-grid{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+    }
+
+    @media (max-width: 768px) {
+      body{padding:12px}
+      .wrap{max-width:100%}
+      .topbar{flex-direction:column;align-items:flex-start;gap:16px}
+      .intro .txt{max-width:100%}
+      .controls{width:100%;justify-content:space-between}
+      .signals-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+      .signals-grid.compact{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
+      .stats-panel{flex-direction:column}
+      .history{flex-direction:column;align-items:flex-start}
+      .analytics-tabs{justify-content:center}
+      .heatmap{grid-template-columns:repeat(8,1fr)}
+    }
+
+    @media (max-width: 640px) {
+      .signals-grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+      .signals-grid.compact{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}
+      .pred{font-size:13px;padding:8px 10px}
+    }
+
+    @media (max-width: 480px) and (orientation: portrait) {
+      .signals-grid{grid-template-columns:repeat(2,1fr)}
+      .signals-grid.compact{grid-template-columns:repeat(3,1fr)}
+      .tile.list{flex-direction:column;align-items:flex-start;gap:8px}
+      .tile.list .meta{justify-content:flex-start;width:100%}
+      .tile.list .pred{justify-content:center;margin:0}
+      .heatmap{grid-template-columns:repeat(6,1fr)}
+      .chart-container{height:150px}
+    }
+
+    @media (max-width: 768px) and (orientation: landscape) {
+      .signals-grid{grid-template-columns:repeat(4,1fr)}
+      .signals-grid.compact{grid-template-columns:repeat(5,1fr)}
+      .tile{min-height:80px}
+    }
+
+    @media (max-width: 360px) {
+      .signals-grid{grid-template-columns:1fr}
+      .signals-grid.compact{grid-template-columns:repeat(2,1fr)}
+      .pred{font-size:12px;padding:6px 8px}
+    }
+
+    /* High-density screens */
+    @media (min-resolution: 2dppx) {
+      .tile{border-width:0.5px}
+      .btn{border-width:0.5px}
+    }
+
+    /* Reduced motion */
+    @media(prefers-reduced-motion:reduce){
+      *{animation-duration:0.001ms!important;transition:none!important}
+      .loading-spinner{animation:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="app">
+    <header>
+      <h1>🚀 SALA DE SINAIS ONLINE AVIATOR </h1>
+      <p class="lead">
+    🚀 Sinais automáticos 24h • Novos alertas a cada segundo <strong id="intervalSecondsLabel">60</strong>s• Não perca nenhuma oportunidade! 
+    
+</p>
+
+    </header>
+
+    <section class="panel" aria-labelledby="panelTitle">
+      <div class="topbar">
+        <div class="intro" id="panelTitle">
+          <div class="txt">
+            <h2>📣 Caro jogador</h2>
+            <p>⚠️ Não fique de fora! Cadastre-se agora na plataforma recomendada, faça seu primeiro depósito e libere acesso imediato aos sinais 100% precisos.</p>
+          </div>
+        </div>
+
+        <div class="actions">
+          <div class="online" title="Pessoas online">
+            <span class="dot" aria-hidden="true"></span>
+            <span id="onlineCount">-- pessoas online</span>
+          </div>
+
+          <div class="sound-controls">
+            <button id="soundToggle" class="sound-btn active">🔊 Sons</button>
+          </div>
+
+          <div class="controls" role="toolbar" aria-label="Controles">
+            <button id="pauseBtn" class="btn btn-secondary" aria-pressed="false">⏸️ Pausar</button>
+            <button id="resumeBtn" class="btn btn-secondary" hidden>▶️ Retomar</button>
+            <button class="btn btn-register" onclick="location.href='https://txunaplay.com/t918e544d'">🔥 Criar Conta</button>
+            <button class="btn btn-vip" onclick="window.open('https://whatsapp.com/channel/0029VbBufjm6GcGCVRnTLY1l','_blank','noopener')">💬 Grupo VIP</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- View Controls -->
+      <div class="view-controls">
+        <button class="view-btn active" data-view="grid">📊 Grid</button>
+        <button class="view-btn" data-view="compact">📱 Compacto</button>
+        <button class="view-btn" data-view="list">📝 Lista</button>
+      </div>
+
+      <!-- Statistics Panel -->
+      <div class="stats-panel">
+        <div class="stat-card">
+          <div class="stat-value" id="totalSignals">0</div>
+          <div class="stat-label">Sinais Hoje</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="avgMultiplier">0.00X</div>
+          <div class="stat-label">Média Multiplicador</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="successRate">0%</div>
+          <div class="stat-label">Taxa de Acerto</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="maxMultiplier">0.00X</div>
+          <div class="stat-label">Maior Multiplicador</div>
+        </div>
+      </div>
+
+      <!-- Analytics Panel -->
+      <div class="analytics-panel">
+        <div class="analytics-tabs">
+          <button class="analytics-tab active" data-tab="performance">📈 Performance</button>
+          <button class="analytics-tab" data-tab="heatmap">🔥 Heatmap</button>
+          <button class="analytics-tab" data-tab="hours">🕒 Melhores Horários</button>
+        </div>
+        <div class="analytics-content">
+          <div class="chart-container" id="performanceChart">
+            <canvas id="chartCanvas" width="400" height="200"></canvas>
+          </div>
+          <div class="heatmap" id="heatmap" style="display:none"></div>
+          <div id="hoursAnalysis" style="display:none">
+            <div class="chart-container">
+              <canvas id="hoursCanvas" width="400" height="200"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="board" aria-live="polite">
+        <div class="status-row">
+          <div class="countdown-wrap" aria-hidden="false">
+            <div class="ring" aria-hidden="true" id="progressRing">
+              <svg viewBox="0 0 36 36" width="56" height="56" aria-hidden="true">
+                <path d="M18 2.0845
+                         a 15.9155 15.9155 0 0 1 0 31.831
+                         a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="2"></path>
+                <path id="ringProgress" d="M18 2.0845
+                         a 15.9155 15.9155 0 0 1 0 31.831
+                         a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="url(#grad1)" stroke-width="2" stroke-linecap="round" stroke-dasharray="0 100"></path>
+                <defs>
+                  <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#00ff88" />
+                    <stop offset="100%" stop-color="#aaff00" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="num" id="ringNum">60</div>
+            </div>
+
+            <div class="timer">
+              <div class="time-text" id="proximo">⏳ Próximo sinal em 60s</div>
+              <div class="sub">Atualiza automaticamente a cada minuto — modo PREMIUM MAX</div>
+            </div>
+          </div>
+
+          <div class="note" id="note">🔔 Novos sinais automáticos a cada minuto — MÁXIMA PRECISÃO</div>
+        </div>
+
+        <h3 style="color:var(--neon-green);margin:10px 0 6px;">📊 ENTRE CONFIRMADAS MAX</h3>
+
+        <div class="signals-grid" id="grid" role="list" aria-live="polite" aria-label="Sinais recentes"></div>
+
+        <div class="history" aria-hidden="false">
+          <div class="spark" title="Histórico de multiplicadores (últimos sinais)">
+            <canvas id="sparkline" width="180" height="48" aria-hidden="true"></canvas>
+          </div>
+          <div class="list" id="historyList" aria-hidden="false" style="color:var(--muted);font-size:13px"></div>
+        </div>
+
+        <div class="legend" aria-hidden="true">
+          <div class="item">💙 Azul — 1.00X a 1.99X</div>
+          <div class="item">💜 Roxo — 2.00X a 9.99X</div>
+          <div class="item">🌹 Rosa — 10.00X a ∞ (80% entre 10–30X)</div>
+        </div>
+
+        <div class="aviso">⚠️ Conteúdo de demonstração —Jogue com responsabilidade.</div>
+      </div>
+    </section>
+
+    <footer>
+      © <span id="year">2025</span> — Todos os direitos reservados a <strong>BERNARD</strong>.
+    </footer>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="loading-overlay" style="display:none">
+    <div class="loading-spinner"></div>
+  </div>
+
+  <!-- Modal registro central -->
+  <div id="registerModal" class="register-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="head">
+      <div>
+   <h3>🚀 Caro jogador, uma oportunidade te espera!</h3>
+<p>Ainda não criou sua conta? Crie agora, faça o depósito inicial e desbloqueie o acesso total aos sinais que estão fazendo outros jogadores lucrarem em tempo real.</p>
+
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button id="closeModalBtn" class="register-close" aria-label="Fechar">✕</button>
+      </div>
+    </div>
+
+    <div class="register-actions">
+      <a id="modalCreateBtn" class="register-cta" href="https://txunaplay.com/t918e544d" target="_blank" rel="noopener">🔥 Criar Conta</a>
+    </div>
+  </div>
+
+  <!-- Live region for screen readers -->
+  <div class="sr-only" aria-live="polite" id="srLive"></div>
+
+  <script>
+    /*************************
+     * CONFIGURAÇÃO SUPER HIPER MEGA MAX
+     *************************/
+    const TILES = 8;
+    const INTERVAL_SECONDS = 60;
+    const POPUP_MIN_MS = 15000;
+    const POPUP_MAX_MS = 35000;
+    const REGISTER_INTERVAL_MS = 90000;
+    const REGISTER_DURATION_MS = 22000;
+    const ONLINE_MIN = 250;
+    const ONLINE_MAX = 1200;
+    const KEEP_HISTORY = 24;
+
+    /*************************
+     * SISTEMA DE SONS
+     *************************/
+    class SoundSystem {
+      constructor() {
+        this.enabled = true;
+        this.audioContext = null;
+        this.init();
+      }
+
+      init() {
+        try {
+          this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+          console.warn('AudioContext não suportado');
+          this.enabled = false;
+        }
+      }
+
+      playTone(frequency, duration, type = 'sine') {
+        if (!this.enabled || !this.audioContext) return;
+
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+
+        oscillator.frequency.value = frequency;
+        oscillator.type = type;
+
+        gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+
+        oscillator.start(this.audioContext.currentTime);
+        oscillator.stop(this.audioContext.currentTime + duration);
+      }
+
+      playSignalSound(type) {
+        if (!this.enabled) return;
+
+        const sounds = {
+          'Azul': () => this.playTone(523.25, 0.3, 'sine'),
+          'Roxo': () => this.playTone(659.25, 0.4, 'square'),
+          'Rosa': () => {
+            this.playTone(783.99, 0.5, 'sine');
+            setTimeout(() => this.playTone(987.77, 0.5, 'sine'), 100);
+          }
+        };
+
+        if (sounds[type]) sounds[type]();
+      }
+
+      playCountdownAlert() {
+        if (!this.enabled) return;
+        this.playTone(880, 0.2, 'sine');
+        setTimeout(() => this.playTone(1046.50, 0.2, 'sine'), 200);
+      }
+
+      playCopySound() {
+        if (!this.enabled) return;
+        this.playTone(1318.51, 0.1, 'sine');
+      }
+
+      toggle() {
+        this.enabled = !this.enabled;
+        return this.enabled;
+      }
+    }
+
+    /*************************
+     * ELEMENTOS
+     *************************/
+    const grid = document.getElementById('grid');
+    const proximoEl = document.getElementById('proximo');
+    const onlineEl = document.getElementById('onlineCount');
+    const ringNum = document.getElementById('ringNum');
+    const ringProgress = document.getElementById('ringProgress');
+    const sparkCanvas = document.getElementById('sparkline');
+    const historyListEl = document.getElementById('historyList');
+    const srLive = document.getElementById('srLive');
+    const registerModal = document.getElementById('registerModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const resumeBtn = document.getElementById('resumeBtn');
+    const intervalSecondsLabel = document.getElementById('intervalSecondsLabel');
+    const soundToggle = document.getElementById('soundToggle');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    
+    // Statistics elements
+    const totalSignalsEl = document.getElementById('totalSignals');
+    const avgMultiplierEl = document.getElementById('avgMultiplier');
+    const successRateEl = document.getElementById('successRate');
+    const maxMultiplierEl = document.getElementById('maxMultiplier');
+
+    // View controls
+    const viewButtons = document.querySelectorAll('.view-btn');
+    const analyticsTabs = document.querySelectorAll('.analytics-tab');
+
+    // Initialize sound system
+    const soundSystem = new SoundSystem();
+
+    intervalSecondsLabel.textContent = INTERVAL_SECONDS;
+
+    /*************************
+     * SISTEMA DE VISUALIZAÇÃO
+     *************************/
+    let currentView = 'grid';
+
+    function setView(view) {
+      currentView = view;
+      grid.className = `signals-grid ${view}`;
+      
+      // Update active button
+      viewButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === view);
+      });
+
+      // Update tiles
+      const tiles = grid.querySelectorAll('.tile');
+      tiles.forEach(tile => {
+        tile.className = `tile ${view}`;
+        if (Math.random() < 0.1) {
+          tile.classList.add('premium');
+        }
+      });
+    }
+
+    /*************************
+     * SISTEMA DE ANÁLISE AVANÇADA
+     *************************/
+    let performanceData = [];
+    let hourlyStats = Array(24).fill(0).map(() => ({ count: 0, total: 0, successes: 0 }));
+
+    function updatePerformanceChart() {
+      const canvas = document.getElementById('chartCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Ajustar tamanho do canvas para ser responsivo
+      const container = canvas.parentElement;
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+      
+      // Simulate performance data
+      const labels = Array.from({length: 12}, (_, i) => `${i * 2}h`);
+      const data = Array.from({length: 12}, () => Math.random() * 100);
+      
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw chart
+      const padding = 20;
+      const chartWidth = canvas.width - padding * 2;
+      const chartHeight = canvas.height - padding * 2;
+      
+      ctx.strokeStyle = '#00ff88';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      
+      data.forEach((value, index) => {
+        const x = padding + (index / (data.length - 1)) * chartWidth;
+        const y = padding + chartHeight - (value / 100) * chartHeight;
+        
+        if (index === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+      
+      ctx.stroke();
+      
+      // Draw points
+      ctx.fillStyle = '#00ff88';
+      data.forEach((value, index) => {
+        const x = padding + (index / (data.length - 1)) * chartWidth;
+        const y = padding + chartHeight - (value / 100) * chartHeight;
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    function updateHeatmap() {
+      const heatmap = document.getElementById('heatmap');
+      heatmap.innerHTML = '';
+      
+      for (let i = 0; i < 24; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'heatmap-cell';
+        cell.dataset.intensity = Math.floor(Math.random() * 5) + 1;
+        cell.title = `Hora ${i}:00 - Intensidade ${cell.dataset.intensity}`;
+        heatmap.appendChild(cell);
+      }
+    }
+
+    function updateHoursAnalysis() {
+      const canvas = document.getElementById('hoursCanvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Ajustar tamanho do canvas para ser responsivo
+      const container = canvas.parentElement;
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+      
+      // Simulate hourly performance
+      const data = Array.from({length: 24}, () => Math.random() * 100);
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      const padding = 20;
+      const chartWidth = canvas.width - padding * 2;
+      const chartHeight = canvas.height - padding * 2;
+      
+      // Fill area under line
+      ctx.fillStyle = 'rgba(0, 255, 136, 0.2)';
+      ctx.beginPath();
+      data.forEach((value, hour) => {
+        const x = padding + (hour / 23) * chartWidth;
+        const y = padding + chartHeight - (value / 100) * chartHeight;
+        if (hour === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.lineTo(padding + chartWidth, padding + chartHeight);
+      ctx.lineTo(padding, padding + chartHeight);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Draw line
+      ctx.strokeStyle = '#00ff88';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      data.forEach((value, hour) => {
+        const x = padding + (hour / 23) * chartWidth;
+        const y = padding + chartHeight - (value / 100) * chartHeight;
+        if (hour === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    }
+
+    /*************************
+     * ANIMAÇÕES E TRANSITIONS
+     *************************/
+    function showLoading() {
+      loadingOverlay.style.display = 'flex';
+      setTimeout(() => {
+        loadingOverlay.style.display = 'none';
+      }, 800);
+    }
+
+    function animateTileAppear(tile) {
+      tile.style.animation = 'none';
+      setTimeout(() => {
+        tile.style.animation = 'tileAppear 0.5s ease-out';
+      }, 10);
+    }
+
+    /*************************
+     * LISTA COM MAIS DE 600 NOMES DIFERENTES
+     *************************/
+    const nomes = [
+        "Abílio", "Adalberto", "Adão", "Adelaide", "Adelina", "Ademar", "Adriana", "Adriano", "Afonso", "Agatha",
+        "Agnaldo", "Agnelo", "Aida", "Alair", "Alana", "Alberto", "Albino", "Alcides", "Alcione", "Aldonça",
+        "Alegria", "Alejandro", "Alessandra", "Alex", "Alexandra", "Alexandre", "Aléxia", "Alfredo", "Alice", "Alícia",
+        "Alípio", "Alisson", "Almerinda", "Almor", "Alonso", "Aluísio", "Alzira", "Amadeu", "Amador", "Amália",
+        "Amanda", "Amélia", "Américo", "Amílcar", "Ana", "Anabela", "Anacleto", "Anastácio", "André", "Andreia",
+        "Anésia", "Angélica", "Ângelo", "Aníbal", "Anita", "Anselmo", "Antónia", "Antônio", "Aparecida", "Apolinário",
+        "Apolónia", "Aracy", "Arlete", "Armando", "Arminda", "Arnaldo", "Aron", "Artur", "Ary", "Astrid",
+        "Augusta", "Augusto", "Aura", "Aurélia", "Aurélio", "Aurora", "Bárbara", "Barnabé", "Bartolomeu", "Basílio",
+        "Beatriz", "Bela", "Belchior", "Benedita", "Benedito", "Benício", "Benjamim", "Bento", "Bernadete", "Bernarda",
+        "Bernardo", "Berta", "Betânia", "Betina", "Bianca", "Boaventura", "Branca", "Bráulio", "Brenda", "Brigida",
+        "Bruce", "Bruna", "Bruno", "Caetano", "Caio", "Calixto", "Calvin", "Camilo", "Cândida", "Cândido",
+        "Carla", "Carlos", "Carlota", "Carmela", "Carmelita", "Carmem", "Carolina", "Cássia", "Cássio", "Castor",
+        "Catarina", "Cátia", "Cecília", "Celeste", "Célia", "Celina", "Celso", "César", "Cezar", "Cícera",
+        "Cícero", "Cid", "Cíntia", "Cipriano", "Cirilo", "Ciro", "Clara", "Clarice", "Cláudia", "Cláudio",
+        "Cleide", "Clemente", "Cleonice", "Cleopatra", "Cléo", "Clóvis", "Conceição", "Constança", "Constantino", "Cornélio",
+        "Cosme", "Cremilda", "Cremilde", "Cristiana", "Cristiano", "Cristina", "Cristóvão", "Cruz", "Custódia", "Custódio",
+        "Dália", "Dalila", "Damião", "Daniel", "Daniela", "Dante", "Dário", "David", "Deise", "Deolinda",
+        "Deusdedit", "Diana", "Diego", "Dilan", "Dilma", "Dina", "Dinah", "Diniz", "Dino", "Diógenes",
+        "Dionísio", "Djalma", "Domênico", "Domingos", "Donatela", "Donato", "Dora", "Dória", "Doroteia", "Dorothy",
+        "Douglas", "Dulce", "Duncan", "Duarte", "Débora", "Edgar", "Edite", "Edith", "Edmar", "Edmundo",
+        "Eduarda", "Eduardo", "Elaine", "Elba", "Elda", "Eleazar", "Elena", "Eli", "Eliana", "Elias",
+        "Eliezer", "Elina", "Elisa", "Elisabete", "Elisângela", "Eliseu", "Eliza", "Elizabeth", "Eloá", "Eloísa",
+        "Elsa", "Elvira", "Ema", "Emanuela", "Emanuel", "Emerson", "Emília", "Emílio", "Enéas", "Eneida",
+        "Enzo", "Erasmo", "Eriberto", "Erica", "Eric", "Erik", "Ernesto", "Esmeralda", "Esperança", "Estanislau",
+        "Estefânia", "Estela", "Ester", "Estévão", "Eugénia", "Eugénio", "Eunice", "Eusébio", "Eva", "Evaldo",
+        "Evandra", "Evangelina", "Evaristo", "Evelyn", "Expedito", "Ezekiel", "Ezra", "Fabiana", "Fábio", "Fabrício",
+        "Fátima", "Faustino", "Fausto", "Felipe", "Félix", "Fernanda", "Fernando", "Filipe", "Filomena", "Fiona",
+        "Firmino", "Flamínia", "Flávia", "Flávio", "Flor", "Flora", "Florbela", "Florentino", "Floriano", "Florinda",
+        "Fortunato", "Franca", "Francesca", "Francis", "Francisca", "Francisco", "Frederico", "Frida", "Gabriel", "Gabriela",
+        "Gaël", "Galdino", "Galileu", "Gaspar", "Gastão", "Gaudêncio", "Genésio", "Geoffrey", "George", "Georgete",
+        "Geralda", "Geraldo", "Gerardo", "Gertrudes", "Giana", "Gilda", "Gina", "Gioconda", "Gionatan", "Giovana",
+        "Giovanni", "Gisela", "Gisele", "Giuseppe", "Glauco", "Glória", "Godofredo", "Graça", "Graciano", "Graciela",
+        "Gregório", "Greta", "Guadalupe", "Gualter", "Guarani", "Guedes", "Guida", "Guilherme", "Guiomar", "Gustavo",
+        "Gutenberg", "Haroldo", "Heitor", "Helen", "Helena", "Hélder", "Hélio", "Henrique", "Heraldo", "Herbert",
+        "Hermano", "Hermínia", "Hernâni", "Hilda", "Hilário", "Hipólito", "Honório", "Horácio", "Hortência", "Hortênsia",
+        "Hugo", "Humberto", "Iara", "Ibrahim", "Ida", "Idália", "Igor", "Ilda", "Ildefonso", "Ilena",
+        "Ilídio", "Ilma", "Ilsa", "Iolanda", "Ione", "Iracema", "Irene", "Irina", "Íris", "Irma",
+        "Isaac", "Isabel", "Isabela", "Isadora", "Isaque", "Isaura", "Isidoro", "Isilda", "Isis", "Ismael",
+        "Israel", "Ítalo", "Itamar", "Ivan", "Ivana", "Ivo", "Ivone", "Jacinta", "Jacinto", "Jackson",
+        "Jacob", "Jade", "Jaime", "Jair", "Jake", "Jandira", "Janete", "Janice", "Jaqueline", "Jasmim",
+        "Jason", "Javier", "Jean", "Jeane", "Jéfferson", "Jennifer", "Jeremias", "Jéssica", "Jesus", "Joana",
+        "João", "Joaquim", "Joel", "Joelma", "Johan", "Jonas", "Jonathan", "Jordana", "Jordão", "Jorge",
+        "Jorje", "José", "Josefa", "Josefina", "Joshua", "Josias", "Josué", "Jovina", "Joyce", "Juan",
+        "Júlia", "Juliana", "Juliano", "Júlio", "Júnior", "Jurandir", "Justina", "Justino", "Júpiter", "Kaique",
+        "Karen", "Karina", "Karl", "Kátia", "Keith", "Kelly", "Kelvin", "Kevin", "Kim", "Kyara",
+        "Ladislau", "Lais", "Lara", "Larissa", "Laura", "Lauren", "Laurinda", "Lavínia", "Lázaro", "Leandro",
+        "Leda", "Leila", "Leiria", "Lélia", "Lenira", "Leo", "Leon", "Leonardo", "Leonel", "Leonor",
+        "Leopoldo", "Letícia", "Lia", "Liana", "Lídia", "Lígia", "Lília", "Lilian", "Liliana", "Lina",
+        "Linda", "Lindolfo", "Lineu", "Lino", "Lívia", "Liz", "Lorena", "Lorenzo", "Loreta", "Lourdes",
+        "Lourenço", "Lua", "Luca", "Lucas", "Luciana", "Luciano", "Lúcia", "Luciene", "Lucila", "Lucília",
+        "Lúcio", "Lucy", "Ludmila", "Luigi", "Luís", "Luísa", "Luna", "Lútero", "Luz", "Luzia",
+        "Mabel", "Macedo", "Mafalda", "Magda", "Magno", "Maísa", "Maitê", "Malcolm", "Manoel", "Manuela",
+        "Mara", "Marcela", "Marcelina", "Marcelino", "Marcelo", "Márcia", "Marco", "Marcos", "Margarida", "Márcia",
+        "Mário", "Marisa", "Marisol", "Marta", "Martim", "Martin", "Martinha", "Martinho", "Mateus", "Matias",
+        "Maura", "Maurício", "Mauro", "Max", "Maximiliano", "Maya", "Medeiros", "Mel", "Melania", "Melissa",
+        "Mercedes", "Mia", "Micael", "Michele", "Miguel", "Mikael", "Milton", "Mira", "Míriam", "Mirna",
+        "Moacir", "Moana", "Moema", "Mónica", "Morgana", "Murilo", "Nadia", "Nadine", "Nair", "Nancy",
+        "Naomi", "Nara", "Narcisa", "Natal", "Natália", "Natasha", "Natan", "Nazaré", "Neide", "Nélida",
+        "Nélson", "Nereu", "Nestor", "Neusa", "Neuza", "Ney", "Nice", "Nicolas", "Nicolau", "Nicole",
+        "Nilda", "Nilza", "Nina", "Nivaldo", "Noah", "Noel", "Noemi", "Norberto", "Norma", "Nuno",
+        "Octávio", "Odete", "Odília", "Odon", "Ofélia", "Olga", "Olímpia", "Olímpio", "Oliver", "Olivia",
+        "Omar", "Ondina", "Onofre", "Orlanda", "Orlando", "Oscar", "Oséias", "Osiris", "Osvaldo", "Otacílio",
+        "Otávia", "Otávio", "Oto", "Ovídio", "Owen", "Pablo", "Paco", "Paola", "Patrícia", "Patrick",
+        "Paul", "Paula", "Paulina", "Paulino", "Paulo", "Pearl", "Pedro", "Penélope", "Perla", "Pérsio",
+        "Petra", "Petrônio", "Pietra", "Pilar", "Pitágoras", "Plácido", "Poliana", "Pompéia", "Porfírio", "Priscila",
+        "Prometeu", "Querubim", "Quésia", "Quincas", "Quintino", "Quitéria", "Rachel", "Rafael", "Rafaela", "Raí",
+        "Raimundo", "Ralf", "Ramiro", "Ramon", "Ramona", "Raquel", "Ravi", "Ray", "Rebeca", "Regina",
+        "Reginaldo", "Reinaldo", "Remo", "Renan", "Renata", "Renato", "Reynaldo", "Ricardo", "Rita", "Roberta",
+        "Roberto", "Robson", "Rodolfo", "Rodrigo", "Rogério", "Rolando", "Romão", "Romário", "Romeu", "Rômulo",
+        "Ronaldo", "Rosa", "Rosália", "Rosana", "Rose", "Roseli", "Rosemary", "Rouxinol", "Ruan", "Rúben",
+        "Rudi", "Rufino", "Rui", "Rute", "Ruth", "Ryan", "Sabrina", "Sadie", "Safira", "Salete",
+        "Sálvio", "Salomão", "Salomé", "Samanta", "Samantha", "Samara", "Sami", "Samira", "Samuel", "Sandra",
+        "Sandro", "Sansão", "Santiago", "Santo", "Sara", "Sarah", "Saul", "Savio", "Scarlett", "Sebastiana",
+        "Sebastião", "Selena", "Selma", "Sérgio", "Sérgio", "Sete", "Severino", "Sheila", "Shelby", "Sidney",
+        "Silas", "Silvana", "Silvano", "Sílvia", "Silvio", "Simão", "Simone", "Siqueira", "Siri", "Sissi",
+        "Sócrates", "Solange", "Sônia", "Sophia", "Soraia", "Sueli", "Susana", "Suzana", "Sylvia", "Taciano",
+        "Tadeu", "Tânia", "Tatiana", "Tatiane", "Tavinho", "Tecla", "Telma", "Telmo", "Teo", "Teodora",
+        "Teodoro", "Teresa", "Teresina", "Teresinha", "Thales", "Thalia", "Theo", "Thiago", "Thomas", "Tibúrcio",
+        "Ticiano", "Tierri", "Tiffany", "Tilde", "Timóteo", "Tito", "Tobias", "Tom", "Tomás", "Tomaz",
+        "Toni", "Tony", "Tracy", "Tristão", "Troy", "Tulio", "Túlio", "Ubirajara", "Ubiratã", "Ugo",
+        "Ulisses", "Ulrica", "Umberto", "Una", "Urbano", "Uriel", "Ursula", "Valdemar", "Valentim", "Valentina",
+        "Valério", "Valéria", "Valter", "Vanda", "Vanderlei", "Vanessa", "Vânia", "Vasco", "Vera", "Veridiana",
+        "Verônica", "Vicente", "Victor", "Victória", "Vidal", "Vilma", "Vinícius", "Violeta", "Virgília", "Virgílio",
+        "Virginia", "Viriato", "Vitor", "Vitória", "Viviane", "Vladimir", "Wagner", "Waldemar", "Wallace", "Walter",
+        "Wanda", "Wanderley", "Washington", "Watson", "Wesley", "Wilbert", "Wilma", "Wilson", "Xavier", "Xenia",
+        "Xico", "Yara", "Yasmin", "Yolanda", "Yone", "Yoshi", "Yuri", "Yves", "Zacarias", "Zaira",
+        "Zara", "Zélia", "Zenaide", "Zeno", "Zilda", "Zita", "Zoe", "Zora", "Zoraide", "Zulmira",
+        "Aissa", "Alima", "Aminata", "Amadu", "Babu", "Bakary", "Bambo", "Banzé", "Batu", "Bia",
+        "Bimba", "Binta", "Bira", "Bombo", "Buá", "Cadi", "Cadu", "Caetana", "Café", "Cajá",
+        "Calú", "Camará", "Candengue", "Capitu", "Cassange", "Catana", "Catumbela", "Chica", "Chico", "Chila",
+        "Cuta", "Dada", "Dadi", "Dambi", "Dami", "Dandara", "Dango", "Dário", "Demba", "Dengo",
+        "Diamantino", "Dina", "Ding", "Dino", "Djalo", "Djamila", "Domingas", "Dona", "Dumba", "Ekuikui",
+        "Elisa", "Ema", "Essa", "Eva", "Fana", "Fátima", "Fefe", "Fifi", "Fina", "Fofo",
+        "Fula", "Fuma", "Funda", "Fungai", "Funguê", "Futa", "Gambi", "Gamo", "Ganga", "Gego",
+        "Gelo", "Gemba", "Gengo", "Gervásia", "Gimo", "Ginga", "Gino", "Gito", "Giza", "Godo",
+        "Gogé", "Gomo", "Gonga", "Gonzo", "Gordo", "Guga", "Gugu", "Guia", "Guilhermina", "Guma",
+        "Gungo", "Guto", "Hélder", "Ilda", "Imani", "Inácio", "Iracema", "Isa", "Isaura", "Ivo",
+        "Jamba", "Jandira", "Januário", "Jiboia", "Jimo", "Jinga", "Joca", "Jó", "Jomo", "Jonga",
+        "Juju", "Julião", "Juma", "Jurema", "Kadi", "Kadu", "Kai", "Kailane", "Kamba", "Kami",
+        "Kanga", "Kanto", "Karine", "Kassange", "Katia", "Katu", "Keba", "Kebé", "Kedy", "Keita",
+        "Kelson", "Kemba", "Kenda", "Keto", "Kiaku", "Kibala", "Kibela", "Kiko", "Kila", "Kimala",
+        "Kinda", "King", "Kinito", "Kino", "Kipaca", "Kita", "Kito", "Kituxi", "Kiza", "Kizo",
+        "Kuku", "Kuluma", "Kung", "Kuto", "Ladí", "Lae", "Laila", "Laka", "Lalá", "Lamba",
+        "Lami", "Lando", "Langa", "Lanze", "Lara", "Lazáro", "Lé", "Leca", "Leco", "Leda",
+        "Lela", "Lelo", "Lena", "Lenda", "Leni", "Leno", "Lézia", "Lia", "Lica", "Lico",
+        "Lidé", "Lila", "Lili", "Lima", "Lina", "Linda", "Lindo", "Lino", "Lió", "Lisa",
+        "Lita", "Lito", "Liza", "Lolo", "Loma", "Lomi", "Lona", "Lopo", "Lota", "Lua",
+        "Luca", "Luci", "Luco", "Ludi", "Lué", "Luéji", "Luh", "Lui", "Luí", "Luka",
+        "Lula", "Luli", "Lulu", "Luma", "Lumi", "Luna", "Lungo", "Lupi", "Luso", "Luti",
+        "Luto", "Luzi", "Maba", "Maca", "Macá", "Macaia", "Macalé", "Maco", "Madalena", "Madi",
+        "Mado", "Madona", "Mae", "Mafa", "Mafalda", "Mafi", "Maga", "Magda", "Magi", "Mago",
+        "Maia", "Maiá", "Maico", "Maila", "Maima", "Maina", "Maió", "Maira", "Maité", "Maju",
+        "Maka", "Maki", "Mala", "Malá", "Malai", "Malaika", "Malan", "Malé", "Mali", "Malik",
+        "Malo", "Malu", "Mama", "Mamá", "Mamadu", "Mami", "Mamo", "Maná", "Mana", "Mancha",
+        "Mandi", "Mando", "Mane", "Mané", "Manga", "Mani", "Manico", "Mano", "Manso", "Manta",
+        "Manu", "Manuel", "Maomi", "Mapa", "Maputo", "Mara", "Mará", "Maracá", "Maradi", "Mare",
+        "Mari", "Maria", "Mariá", "Marialva", "Mariano", "Mário", "Mariza", "Marley", "Marta", "Martim",
+        "Maru", "Maruca", "Marujo", "Massi", "Mata", "Matá", "Matias", "Mato", "Mau", "Maura",
+        "Mauro", "Mava", "Maxi", "Maya", "Maza", "Maze", "Mazi", "Meca", "Meda", "Meg",
+        "Mei", "Meia", "Meire", "Meka", "Mela", "Melâ", "Mele", "Meli", "Melo", "Mem",
+        "Mena", "Mene", "Mené", "Meni", "Menina", "Menino", "Meno", "Mentu", "Mequé", "Mera",
+        "Meri", "Merlin", "Mero", "Messa", "Messi", "Meto", "Meu", "Mia", "Miá", "Mica",
+        "Mico", "Mido", "Miga", "Migo", "Migué", "Mika", "Miki", "Mila", "Milá", "Mile",
+        "Mili", "Milo", "Mima", "Mimá", "Mimi", "Mimo", "Mina", "Miná", "Mine", "Ming",
+        "Mingo", "Minh", "Mino", "Mio", "Mió", "Mira", "Mirá", "Miri", "Miro", "Misa",
+        "Mise", "Misi", "Mita", "Mito", "Miu", "Miza", "Mize", "Moá", "Moa", "Moca",
+        "Mocá", "Moco", "Mocó", "Moda", "Modi", "Moe", "Moga", "Mogá", "Moi", "Moia",
+        "Moica", "Moise", "Moita", "Moka", "Mola", "Mole", "Moli", "Molo", "Moma", "Momi",
+        "Momo", "Mona", "Mone", "Monga", "Moni", "Mono", "Mopa", "Mopi", "Moqui", "Mora",
+        "Morá", "More", "Morena", "Moreno", "Mori", "Moro", "Mosa", "Mose", "Mosi", "Moso",
+        "Mota", "Mote", "Moti", "Moto", "Mou", "Mova", "Moxi", "Moyo", "Moz", "Muca",
+        "Mucha", "Muco", "Muda", "Mude", "Mudi", "Mudo", "Mue", "Muga", "Mui", "Mula",
+        "Mule", "Muli", "Mulo", "Muma", "Mume", "Mumi", "Mumu", "Muna", "Mune", "Munga",
+        "Muni", "Muno", "Mupa", "Mura", "Muri", "Muro", "Muru", "Musa", "Muse", "Muta",
+        "Muti", "Muto", "Mutu", "Naba", "Nabi", "Naca", "Naco", "Nada", "Nadi", "Nado",
+        "Nafa", "Nafi", "Naga", "Nago", "Nai", "Naia", "Naíde", "Naílton", "Nair", "Naja",
+        "Nala", "Nalo", "Nalu", "Nama", "Nami", "Namo", "Nana", "Naná", "Nanda", "Nando",
+        "Nane", "Nani", "Nano", "Nanu", "Nara", "Naré", "Nari", "Naro", "Nasa", "Nase",
+        "Nasi", "Nata", "Natá", "Nati", "Nato", "Natu", "Nau", "Naza", "Naze", "Nazi",
+        "Neca", "Neco", "Neda", "Nede", "Nedi", "Nedo", "Nei", "Neia", "Neide", "Neiva",
+        "Neka", "Neko", "Nela", "Nele", "Neli", "Nelo", "Nema", "Neme", "Nemi", "Nemo",
+        "Nena", "Nene", "Neni", "Neno", "Neo", "Nepa", "Nere", "Neri", "Nero", "Nesa",
+        "Nese", "Nesi", "Neso", "Neta", "Neti", "Neto", "Neusa", "Neuzi", "Nevo", "Ney",
+        "Nezá", "Nho", "Niá", "Nica", "Nice", "Nici", "Nico", "Nida", "Nidi", "Nido",
+        "Niel", "Nifa", "Nife", "Nifi", "Nifo", "Nika", "Niki", "Niko", "Nila", "Nilo",
+        "Nima", "Nimi", "Nimo", "Nina", "Niná", "Nini", "Nino", "Nipa", "Nipi", "Nipo",
+        "Niquel", "Nira", "Nire", "Niri", "Niro", "Nisa", "Nise", "Nisi", "Niso", "Nita",
+        "Nito", "Niu", "Niva", "Nive", "Nivi", "Niza", "Nize", "Noá", "Noah", "Noal",
+        "Noá", "Noba", "Nobe", "Nobi", "Noca", "Noce", "Noco", "Noda", "Node", "Nodi",
+        "Nodo", "Noe", "Noé", "Noel", "Noemi", "Noga", "Noge", "Nogi", "Nogo", "Noi",
+        "Noia", "Noil", "Noir", "Nola", "Nole", "Noli", "Nolo", "Noma", "Nome", "Nomi",
+        "Nomo", "Nona", "None", "Noni", "Nono", "Nopa", "Nope", "Nopi", "Nora", "Norá",
+        "Nore", "Nori", "Noro", "Nosa", "Nose", "Nosi", "Noso", "Nota", "Note", "Noti",
+        "Noto", "Nova", "Nová", "Nove", "Novi", "Novo", "Noz", "Nuca", "Nuce", "Nuci",
+        "Nuco", "Nuda", "Nude", "Nudi", "Nudo", "Nui", "Numa", "Nume", "Numi", "Nuna",
+        "Nune", "Nuni", "Nuno", "Nupa", "Nuri", "Nuro", "Nusa", "Nuse", "Nusi", "Nuso",
+        "Nuta", "Nuti", "Nuto", "Nutu", "Nuzo", "Nyla", "Nyna", "Nyra", "Nysa", "Nytal"
+    ];
+
+    const rand = (min, max) => Math.random() * (max - min) + min;
+    const randInt = (min, max) => Math.floor(rand(min, max + 1));
+    const choose = arr => arr[Math.floor(Math.random()*arr.length)];
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+    /*************************
+     * LÓGICA DE PREVISÃO
+     *************************/
+    function gerarPrevisaoPorTipo(tipo){
+      if(tipo === 'Azul') return { tipo, emoji: '💙', classe: 'azul', valor: Number((rand(1.00, 1.99)).toFixed(2)) };
+      if(tipo === 'Roxo') return { tipo, emoji: '💜', classe: 'roxo', valor: Number((rand(2.00, 9.99)).toFixed(2)) };
+      let valor = (Math.random() < 0.8) ? Number((rand(10.00, 30.00)).toFixed(2)) : Number((rand(30.01, 120.00)).toFixed(2));
+      return { tipo, emoji: '🌹', classe: 'rosa', valor };
+    }
+
+    /*************************
+     * HISTÓRICO E ESTATÍSTICAS
+     *************************/
+    let history = [];
+    let totalSignals = 0;
+    let maxMultiplier = 0;
+    let successfulSignals = 0;
+
+    function pushHistory(mult) {
+      history.push(mult);
+      if (history.length > KEEP_HISTORY) history.shift();
+      
+      // Update statistics
+      totalSignals++;
+      if (mult > maxMultiplier) maxMultiplier = mult;
+      if (mult >= 2.0) successfulSignals++;
+      
+      // Update hourly stats
+      const hour = new Date().getHours();
+      hourlyStats[hour].count++;
+      hourlyStats[hour].total += mult;
+      if (mult >= 2.0) hourlyStats[hour].successes++;
+      
+      updateStatistics();
+      drawSparkline();
+      updateHistoryList();
+    }
+
+    function updateStatistics() {
+      totalSignalsEl.textContent = totalSignals;
+      maxMultiplierEl.textContent = maxMultiplier.toFixed(2) + 'X';
+      
+      const avg = history.length > 0 ? history.reduce((a, b) => a + b, 0) / history.length : 0;
+      avgMultiplierEl.textContent = avg.toFixed(2) + 'X';
+      
+      const rate = totalSignals > 0 ? (successfulSignals / totalSignals) * 100 : 0;
+      successRateEl.textContent = rate.toFixed(1) + '%';
+    }
+
+    function updateHistoryList(){
+      historyListEl.innerHTML = history.slice().reverse().map((m, idx) => {
+        return `<span title="Multiplicador ${m.toFixed(2)}X">${m.toFixed(2)}X</span>`;
+      }).join(' • ');
+    }
+
+    function drawSparkline(){
+      const c = sparkCanvas;
+      const ctx = c.getContext('2d');
+      ctx.clearRect(0,0,c.width,c.height);
+
+      if (!history.length) return;
+
+      const vals = history.slice();
+      const max = Math.max(...vals);
+      const min = Math.min(...vals);
+      const w = c.width, h = c.height, pad = 6;
+      const step = (w - pad*2) / Math.max(1, vals.length - 1);
+
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      vals.forEach((v,i) => {
+        const x = pad + i * step;
+        const y = h - pad - ((v - min) / Math.max(0.0001, (max - min || 1)))*(h - pad*2);
+        if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      });
+      
+      const g = ctx.createLinearGradient(0,0,w,0);
+      g.addColorStop(0, 'rgba(0,255,136,0.9)');
+      g.addColorStop(1, 'rgba(170,255,0,0.9)');
+      ctx.strokeStyle = g;
+      ctx.stroke();
+
+      vals.forEach((v,i)=>{
+        const x = pad + i * step;
+        const y = h - pad - ((v - min) / Math.max(0.0001, (max - min || 1)))*(h - pad*2);
+        ctx.beginPath();
+        ctx.arc(x,y,2.2,0,Math.PI*2);
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.fill();
+      });
+    }
+
+    /*************************
+     * PREENCHER GRID - FORMATO CORRIGIDO
+     *************************/
+    function preencherGrid(now = new Date()){
+      showLoading();
+      
+      setTimeout(() => {
+        grid.innerHTML = '';
+        const tipos = [];
+        for (let i = 0; i < TILES; i++) {
+          const randVal = Math.random();
+          if (randVal < 0.4) tipos.push('Azul');
+          else if (randVal < 0.7) tipos.push('Roxo');
+          else tipos.push('Rosa');
+        }
+        
+        tipos.forEach((tipo, i) => {
+          const dt = new Date(now.getTime() + i * INTERVAL_SECONDS * 1000);
+          const previsao = gerarPrevisaoPorTipo(tipo);
+
+          const tile = document.createElement('div');
+          tile.className = `tile ${currentView}`;
+          if (Math.random() < 0.15) tile.classList.add('premium');
+          
+          tile.setAttribute('role','listitem');
+          
+          // FORMATO CORRETO: 💙 Azul 1.27X
+          tile.innerHTML = `
+            <div class="time">${dt.toLocaleTimeString('pt-BR',{hour12:false})}</div>
+            <div class="pred ${previsao.classe}">
+              <span>${previsao.emoji} ${previsao.tipo} ${previsao.valor.toFixed(2)}X</span>
+            </div>
+            <div class="meta">
+              <button class="copy" title="Copiar sinal" aria-label="Copiar sinal">📋 Copiar</button>
+              <div style="font-size:12px;color:var(--muted)">Simulado</div>
+            </div>
+            <div class="result-bubble" style="display:none"></div>
+          `;
+
+          const copyBtn = tile.querySelector('.copy');
+          copyBtn.addEventListener('click', () => {
+            const texto = `${previsao.tipo} ${previsao.valor.toFixed(2)}X — ${dt.toLocaleTimeString('pt-BR',{hour12:false})} (demo)`;
+            navigator.clipboard?.writeText(texto).then(()=> {
+              soundSystem.playCopySound();
+              flashBubble(tile, 'Copiado!');
+            }).catch(()=> {
+              soundSystem.playCopySound();
+              flashBubble(tile, 'Copiado!');
+            });
+          });
+
+          grid.appendChild(tile);
+          animateTileAppear(tile);
+        });
+
+        // Play sound for each signal type
+        if (soundSystem.enabled) {
+          setTimeout(() => {
+            tipos.forEach((tipo, i) => {
+              setTimeout(() => soundSystem.playSignalSound(tipo), i * 200);
+            });
+          }, 500);
+        }
+
+        
+      }, 800);
+    }
+
+    function flashBubble(tile, text){
+      const b = tile.querySelector('.result-bubble');
+      b.style.display = 'block';
+      b.textContent = text;
+      setTimeout(()=> b.style.opacity = '1', 20);
+      setTimeout(()=> {
+        b.style.opacity = '0';
+        setTimeout(()=> b.style.display = 'none', 300);
+      }, 1200);
+    }
+
+    /*************************
+     * CONTADOR COM SONS
+     *************************/
+    let paused = false;
+    let countdown = INTERVAL_SECONDS;
+    let lastTick = performance.now();
+    let countdownAlertPlayed = false;
+
+    function updateCountdownUI(){
+      proximoEl.textContent = `⏳ Próximo sinal em ${countdown}s`;
+      ringNum.textContent = countdown;
+      const pct = ((INTERVAL_SECONDS - countdown) / INTERVAL_SECONDS) * 100;
+      ringProgress.setAttribute('stroke-dasharray', `${pct} 100`);
+
+      // Play countdown alert at 10 seconds
+      if (countdown === 10 && !countdownAlertPlayed && soundSystem.enabled) {
+        soundSystem.playCountdownAlert();
+        countdownAlertPlayed = true;
+      }
+    }
+
+    function tick(now) {
+      if (paused) { lastTick = now; requestAnimationFrame(tick); return; }
+      const delta = (now - lastTick) / 1000;
+      if (delta >= 1) {
+        const dec = Math.floor(delta);
+        countdown = clamp(countdown - dec, 0, INTERVAL_SECONDS);
+        lastTick = now;
+        updateCountdownUI();
+      }
+      if (countdown === 0) {
+        gerarCicloDeSinais();
+        countdown = INTERVAL_SECONDS;
+        countdownAlertPlayed = false;
+        lastTick = now;
+      }
+      requestAnimationFrame(tick);
+    }
+
+    /*************************
+     * CICLO DE SINAIS
+     *************************/
+    function gerarCicloDeSinais(){
+      const agora = new Date();
+      preencherGrid(agora);
+
+      const tipoForHistory = (Math.random() < 0.6) ? (Math.random() < 0.7 ? 'Rosa' : 'Roxo') : 'Azul';
+      const previsao = gerarPrevisaoPorTipo(tipoForHistory);
+
+      pushHistory(previsao.valor);
+
+      const nome = choose(nomes);
+      const ganhoSim = Math.floor(rand(100, 8000));
+      const texto = `${nome} simulou um ganho de ${ganhoSim.toLocaleString('pt-MZ')} MT (demo) — ${previsao.emoji} ${previsao.valor.toFixed(2)}X`;
+      showTransientToast(texto);
+
+      
+
+      const firstTile = grid.querySelector('.tile');
+      if (firstTile) {
+        const bubble = firstTile.querySelector('.result-bubble');
+        bubble.style.display = 'block';
+        bubble.textContent = `+${(ganhoSim).toLocaleString('pt-MZ')} MT`;
+        bubble.style.background = 'linear-gradient(90deg, rgba(0,200,100,0.12), rgba(0,255,160,0.12))';
+        setTimeout(()=> {
+          bubble.style.opacity = '0';
+          setTimeout(()=> bubble.style.display = 'none', 300);
+        }, 2500);
+      }
+    }
+
+    /*************************
+     * POPUPS E TOASTS
+     *************************/
+    function randomPopupCycle(){
+      const ms = rand(POPUP_MIN_MS, POPUP_MAX_MS);
+      setTimeout(()=> {
+        if (!paused) mostrarPopupSimulado();
+        randomPopupCycle();
+      }, ms);
+    }
+
+    function mostrarPopupSimulado(){
+      const nome = choose(nomes);
+      const tipo = (Math.random() < 0.6) ? (Math.random() < 0.7 ? 'Rosa' : 'Roxo') : 'Azul';
+      const previsao = gerarPrevisaoPorTipo(tipo);
+      const minStake = Math.max(1, Math.ceil(2000 / previsao.valor));
+      const stake = Math.floor(randInt(minStake, Math.max(minStake+1, minStake*4)));
+      const ganho = stake * previsao.valor;
+
+      const ganhoFmt = ganho.toLocaleString('pt-MZ', {minimumFractionDigits:2, maximumFractionDigits:2});
+      const stakeFmt = stake.toLocaleString('pt-MZ', {minimumFractionDigits:2, maximumFractionDigits:2});
+      const multFmt = previsao.valor.toFixed(2);
+
+      const textos = [
+        `🎯 ${nome} simulou um ganho de ${ganhoFmt} MT em modo de demonstração (${previsao.emoji} ${multFmt}X)`,
+        `💸 ${nome} testou o sinal ${previsao.emoji} ${multFmt}X e obteve ${ganhoFmt} MT (simulado)`,
+        `🔥 Em demonstração: ${nome} entrou com ${stakeFmt} MT e saiu com ${ganhoFmt} MT — ${multFmt}X`,
+        `🏆 Resultado simulado: ${nome} +${ganhoFmt} MT (${previsao.emoji} ${multFmt}X)`,
+        `✅ Demonstração: ${nome} lucrou ${ganhoFmt} MT com ${previsao.emoji} ${multFmt}X`
+      ];
+      const texto = choose(textos);
+      showTransientToast(texto);
+      if (Math.random() < 0.35) pushHistory(previsao.valor);
+    }
+
+    function showTransientToast(text){
+      const popup = document.createElement('div');
+      popup.className = 'popup';
+      popup.style.position = 'fixed';
+      popup.style.left = '20px';
+      popup.style.bottom = '20px';
+      popup.style.background = 'rgba(0,0,0,0.88)';
+      popup.style.color = '#bfffe6';
+      popup.style.padding = '12px 18px';
+      popup.style.borderRadius = '12px';
+      popup.style.fontWeight = '700';
+      popup.style.zIndex = 9999;
+      popup.style.boxShadow = '0 0 20px rgba(0,255,136,0.2)';
+      popup.style.opacity = '0';
+      popup.style.transition = 'transform .25s ease, opacity .25s ease';
+      popup.textContent = text;
+      document.body.appendChild(popup);
+      requestAnimationFrame(()=> { popup.style.opacity = '1'; popup.style.transform = 'translateY(0)'; });
+      setTimeout(()=> {
+        popup.style.opacity = '0';
+        popup.style.transform = 'translateY(-10px)';
+        setTimeout(()=> popup.remove(), 600);
+      }, 6000);
+    }
+
+    /*************************
+     * ONLINE COUNTER
+     *************************/
+    let currentOnline = randInt(ONLINE_MIN, ONLINE_MAX);
+    function atualizarOnline(){
+      const delta = randInt(-14, 18);
+      currentOnline = clamp(currentOnline + delta, ONLINE_MIN, ONLINE_MAX);
+      onlineEl.textContent = `${currentOnline} pessoas online`;
+      setTimeout(atualizarOnline, randInt(2500, 7000));
+    }
+
+    /*************************
+     * MODAL DE REGISTRO
+     *************************/
+    let registerTimer = null;
+    let registerAutoClose = null;
+
+    function showRegisterModal(){
+      registerModal.classList.add('show');
+      registerModal.setAttribute('aria-hidden','false');
+      if (registerAutoClose) clearTimeout(registerAutoClose);
+      registerAutoClose = setTimeout(hideRegisterModal, REGISTER_DURATION_MS);
+    }
+    function hideRegisterModal(){
+      registerModal.classList.remove('show');
+      registerModal.setAttribute('aria-hidden','true');
+      if (registerAutoClose) clearTimeout(registerAutoClose);
+      registerAutoClose = null;
+    }
+    closeModalBtn.addEventListener('click', hideRegisterModal);
+    window.addEventListener('keydown', (e)=> { if (e.key === 'Escape') hideRegisterModal(); });
+
+    function startRegisterCycle(){
+      setTimeout(showRegisterModal, 6000);
+      registerTimer = setInterval(()=> {
+        if (!paused) showRegisterModal();
+      }, REGISTER_INTERVAL_MS);
+    }
+
+    /*************************
+     * CONTROLES
+     *************************/
+    pauseBtn.addEventListener('click', () => {
+      paused = true;
+      pauseBtn.setAttribute('aria-pressed','true');
+      pauseBtn.hidden = true;
+      resumeBtn.hidden = false;
+      srLive.textContent = 'Atualizações pausadas.';
+    });
+    resumeBtn.addEventListener('click', () => {
+      paused = false;
+      lastTick = performance.now();
+      pauseBtn.hidden = false;
+      resumeBtn.hidden = true;
+      srLive.textContent = 'Atualizações retomadas.';
+    });
+
+    // Sound toggle
+    soundToggle.addEventListener('click', () => {
+      const enabled = soundSystem.toggle();
+      soundToggle.classList.toggle('active', enabled);
+      soundToggle.textContent = enabled ? '🔊 Sons' : '🔇 Sons';
+    });
+
+    // View controls
+    viewButtons.forEach(btn => {
+      btn.addEventListener('click', () => setView(btn.dataset.view));
+    });
+
+    // Analytics tabs
+    analyticsTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        analyticsTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        document.getElementById('performanceChart').style.display = 'none';
+        document.getElementById('heatmap').style.display = 'none';
+        document.getElementById('hoursAnalysis').style.display = 'none';
+        
+        if (tab.dataset.tab === 'performance') {
+          document.getElementById('performanceChart').style.display = 'block';
+          updatePerformanceChart();
+        } else if (tab.dataset.tab === 'heatmap') {
+          document.getElementById('heatmap').style.display = 'grid';
+          updateHeatmap();
+        } else if (tab.dataset.tab === 'hours') {
+          document.getElementById('hoursAnalysis').style.display = 'block';
+          updateHoursAnalysis();
+        }
+      });
+    });
+
+    /*************************
+     * INICIALIZAÇÃO
+     *************************/
+    function init(){
+      preencherGrid();
+      atualizarOnline();
+      drawSparkline();
+      updateHistoryList();
+      updateStatistics();
+      updatePerformanceChart();
+      updateHeatmap();
+      
+      lastTick = performance.now();
+      requestAnimationFrame(tick);
+      randomPopupCycle();
+      startRegisterCycle();
+      setTimeout(gerarCicloDeSinais, 1200);
+      
+      // Update year
+      document.getElementById('year').textContent = new Date().getFullYear();
+    }
+
+    updateCountdownUI();
+
+    // Initial fake history
+    for (let i=0;i<8;i++) pushHistory(Number((rand(1.1, Math.random()<0.5? rand(2,8): rand(10,30))).toFixed(2)));
+
+    // Make charts responsive
+    window.addEventListener('resize', () => {
+      updatePerformanceChart();
+      updateHoursAnalysis();
+    });
+
+    init();
+
+    window.addEventListener('beforeunload', ()=> {
+      // Cleanup
+    });
+  </script>
+</body>
+</html>
